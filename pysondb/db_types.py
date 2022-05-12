@@ -13,3 +13,12 @@ DBSchemaType = Dict[
         ]
     ]
 ]
+
+SimpleTypeGroup = Union[int, str, bool]
+
+SingleDataType = Dict[
+    str, Union[
+        SimpleTypeGroup,
+        List[SimpleTypeGroup]
+    ]
+]

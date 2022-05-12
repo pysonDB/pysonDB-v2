@@ -11,9 +11,11 @@ except ImportError:
     UJSON = False
 
 from pysondb.db_types import DBSchemaType
+from pysondb.errors import SchemaTypeError
+from pysondb.errors import UnknownKeyError
 
 
-class PysonDb:
+class PysonDB:
 
     def __init__(self, filename: str, thread_lock: bool = True) -> None:
         self.filename = filename
@@ -48,3 +50,32 @@ class PysonDb:
     def _gen_id(self) -> str:
         # generates a random 18 digit uuid
         return str(int(uuid.uuid4()))[:18]
+
+    def add(self, data: object) -> str:
+        if not isinstance(data, dict):
+            raise TypeError(f'data must be of type dist and not {type(data)}')
+
+        self.lock.acquire()
+        db_data = self._load_file()
+
+        keys = db_data['keys']
+        if not isinstance(keys, list):
+            raise SchemaTypeError(
+                f"keys must of type 'list' and not {type(keys)}")
+        if len(keys) == 0:
+            db_data['keys'] = list(data.keys())
+        else:
+            if not sorted(keys) == sorted(data.keys()):
+                raise UnknownKeyError(
+                    f'Unrecognized / missing key(s) {set(keys) ^ set(data.keys())}'
+                    '(Either the this key(s) does not exists in the DB or is missing in the given data)'
+                )
+
+        _id = self._gen_id()
+        if not isinstance(db_data['data'], dict):
+            raise SchemaTypeError('data key in the db must be of type "dict"')
+
+        db_data['data'][_id] = data
+        self._dump_file(db_data)
+        self.lock.release()
+        return _id
