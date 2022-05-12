@@ -1,4 +1,6 @@
 import json
+import uuid
+from pathlib import Path
 from threading import Lock
 
 
@@ -18,6 +20,8 @@ class PysonDb:
         self.thread_lock = thread_lock
         self.lock = Lock()
 
+        self._gen_db_file()
+
     def _load_file(self) -> DBSchemaType:
         with open(self.filename, encoding='utf-8', mode='r') as f:
             if UJSON:
@@ -32,3 +36,15 @@ class PysonDb:
             else:
                 json.dump(data, f, indent=4)
         return None
+
+    def _gen_db_file(self) -> None:
+        if not Path(self.filename).is_file():
+            self.lock.acquire()
+            self._dump_file(
+                {'version': 2, 'keys': [], 'data': {}}
+            )
+            self.lock.release()
+
+    def _gen_id(self) -> str:
+        # generates a random 18 digit uuid
+        return str(int(uuid.uuid4()))[:18]
