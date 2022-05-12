@@ -20,3 +20,8 @@
 
 in the latest update the key will JS complaint and will a int,
 and it does not need to be converted to a string to be used in JS apps.
+
+### migrating v2
+
+all the methods name are PEP8 complaint.
+eg: addMany -> add_many so on and so forth.

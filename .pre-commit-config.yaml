@@ -26,3 +26,4 @@ repos:
     rev: v0.950
     hooks:
       - id: mypy
+        additional_dependencies: ['types-ujson']
