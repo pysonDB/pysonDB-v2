@@ -2,6 +2,7 @@ import json
 import uuid
 from pathlib import Path
 from threading import Lock
+from typing import Union
 
 
 try:
@@ -11,6 +12,7 @@ except ImportError:
     UJSON = False
 
 from pysondb.db_types import DBSchemaType
+from pysondb.db_types import SingleDataType
 from pysondb.errors import SchemaTypeError
 from pysondb.errors import UnknownKeyError
 
@@ -80,7 +82,7 @@ class PysonDB:
             self._dump_file(db_data)
             return _id
 
-    def add_many(self, data: object) -> None:
+    def add_many(self, data: object, json_response: bool = False) -> Union[SingleDataType, None]:
 
         if not data:
             return None
@@ -94,6 +96,7 @@ class PysonDB:
                 'all the new data in the data list must of type dict')
 
         with self.lock:
+            new_data: SingleDataType = {}
             db_data = self._load_file()
 
             # verify all the keys in all the dicts in the list are valid
@@ -117,7 +120,10 @@ class PysonDB:
                     'data key in the db must be of type "dict"')
 
             for d in data:
-                db_data['data'][self._gen_id()] = d
+                _id = self._gen_id()
+                db_data['data'][_id] = d
+                if json_response:
+                    new_data[_id] = d
             self._dump_file(db_data)
 
-        return None
+        return new_data if json_response else None

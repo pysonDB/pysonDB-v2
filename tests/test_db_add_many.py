@@ -34,7 +34,7 @@ INITIAL_TEST_DATA = {
 
 
 def _new_gen_id(n):
-    yield n
+    yield str(n)
     yield from _new_gen_id(n + 1)
 
 
@@ -181,3 +181,27 @@ def test_add_many_empty_data(tmpdir, data):
     f = tmpdir.join('test.json')
     db = PysonDB(f.strpath)
     db.add_many(data)
+
+
+def test_add_many_json_response(tmpdir, mocker):
+    response = {
+        '0': {
+            'name': 'ad',
+            'age': 19
+        },
+        '1': {
+            'name': 'fredy',
+            'age':  69
+        },
+        '2': {
+            'name': 'mathew',
+            'age': 69
+        }
+    }
+
+    f = tmpdir.join('test.json')
+    _ids = _new_gen_id(0)
+    mocker.patch('pysondb.db.PysonDB._gen_id', wraps=lambda: next(_ids))
+
+    db = PysonDB(f.strpath)
+    assert db.add_many(TEST_DATA, json_response=True) == response
