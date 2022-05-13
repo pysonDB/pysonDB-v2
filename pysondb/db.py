@@ -53,29 +53,71 @@ class PysonDB:
 
     def add(self, data: object) -> str:
         if not isinstance(data, dict):
-            raise TypeError(f'data must be of type dist and not {type(data)}')
+            raise TypeError(f'data must be of type dict and not {type(data)}')
 
-        self.lock.acquire()
-        db_data = self._load_file()
+        with self.lock:
+            db_data = self._load_file()
 
-        keys = db_data['keys']
-        if not isinstance(keys, list):
-            raise SchemaTypeError(
-                f"keys must of type 'list' and not {type(keys)}")
-        if len(keys) == 0:
-            db_data['keys'] = list(data.keys())
-        else:
-            if not sorted(keys) == sorted(data.keys()):
-                raise UnknownKeyError(
-                    f'Unrecognized / missing key(s) {set(keys) ^ set(data.keys())}'
-                    '(Either the this key(s) does not exists in the DB or is missing in the given data)'
-                )
+            keys = db_data['keys']
+            if not isinstance(keys, list):
+                raise SchemaTypeError(
+                    f"keys must of type 'list' and not {type(keys)}")
+            if len(keys) == 0:
+                db_data['keys'] = sorted(list(data.keys()))
+            else:
+                if not sorted(keys) == sorted(data.keys()):
+                    raise UnknownKeyError(
+                        f'Unrecognized / missing key(s) {set(keys) ^ set(data.keys())}'
+                        '(Either the this key(s) does not exists in the DB or is missing in the given data)'
+                    )
 
-        _id = self._gen_id()
-        if not isinstance(db_data['data'], dict):
-            raise SchemaTypeError('data key in the db must be of type "dict"')
+            _id = self._gen_id()
+            if not isinstance(db_data['data'], dict):
+                raise SchemaTypeError(
+                    'data key in the db must be of type "dict"')
 
-        db_data['data'][_id] = data
-        self._dump_file(db_data)
-        self.lock.release()
-        return _id
+            db_data['data'][_id] = data
+            self._dump_file(db_data)
+            return _id
+
+    def add_many(self, data: object) -> None:
+
+        if not data:
+            return None
+
+        if not isinstance(data, list):
+            raise ValueError(
+                f'data must be of type "list" and not {type(data)}')
+
+        if not all(isinstance(i, dict) for i in data):
+            raise ValueError(
+                'all the new data in the data list must of type dict')
+
+        with self.lock:
+            db_data = self._load_file()
+
+            # verify all the keys in all the dicts in the list are valid
+            keys = db_data['keys']
+            if not keys:
+                db_data['keys'] = sorted(list(data[0].keys()))
+                keys = db_data['keys']
+            if not isinstance(keys, list):
+                raise SchemaTypeError(
+                    f"keys must of type 'list' and not {type(keys)}")
+
+            for d in data:
+                if not sorted(keys) == sorted(d.keys()):
+                    raise UnknownKeyError(
+                        f'Unrecognized / missing key(s) {set(keys) ^ set(d.keys())}'
+                        '(Either the this key(s) does not exists in the DB or is missing in the given data)'
+                    )
+
+            if not isinstance(db_data['data'], dict):
+                raise SchemaTypeError(
+                    'data key in the db must be of type "dict"')
+
+            for d in data:
+                db_data['data'][self._gen_id()] = d
+            self._dump_file(db_data)
+
+        return None
