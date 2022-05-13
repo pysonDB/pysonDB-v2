@@ -1,5 +1,7 @@
 ### the readme will be filled later
 
+## still in dev, no PR are accepted for now.
+
 ## the possible schema
 
 ```json
@@ -21,7 +23,7 @@
 in the latest update the key will be a str,
 and it does not need to be converted to a string to be used in JS apps.
 
-### migrating v2
+### migrating to v2
 
 all the methods name are PEP8 complaint.
 eg: addMany -> add_many so on and so forth.
