@@ -70,7 +70,7 @@ class PysonDB:
                 if not sorted(keys) == sorted(data.keys()):
                     raise UnknownKeyError(
                         f'Unrecognized / missing key(s) {set(keys) ^ set(data.keys())}'
-                        '(Either the this key(s) does not exists in the DB or is missing in the given data)'
+                        '(Either the key(s) does not exists in the DB or is missing in the given data)'
                     )
 
             _id = self._gen_id()
@@ -112,7 +112,7 @@ class PysonDB:
                 if not sorted(keys) == sorted(d.keys()):
                     raise UnknownKeyError(
                         f'Unrecognized / missing key(s) {set(keys) ^ set(d.keys())}'
-                        '(Either the this key(s) does not exists in the DB or is missing in the given data)'
+                        '(Either the key(s) does not exists in the DB or is missing in the given data)'
                     )
 
             if not isinstance(db_data['data'], dict):
@@ -127,3 +127,10 @@ class PysonDB:
             self._dump_file(db_data)
 
         return new_data if json_response else None
+
+    def get_all(self) -> SingleDataType:
+        with self.lock:
+            data = self._load_file()['data']
+            if isinstance(data, dict):
+                return data
+        return {}
