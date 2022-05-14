@@ -171,3 +171,30 @@ class PysonDB:
                             new_data[id] = values
 
             return new_data
+
+    def update_up_id(self, id: str, new_data: object) -> SingleDataType:
+        if not isinstance(new_data, dict):
+            raise TypeError(
+                f'new_data must be of type dict and not {type(new_data)!r}')
+
+        with self.lock:
+            data = self._load_file()
+            keys = data['keys']
+
+            if isinstance(keys, list):
+                if not all(i in keys for i in new_data):
+                    raise UnknownKeyError(
+                        f'Unrecognized / missing key(s) {set(keys) ^ set(new_data.keys())}')
+
+            if not isinstance(data['data'], dict):
+                raise SchemaTypeError(
+                    'the value for the data keys in the DB must be of type dict')
+
+            if id not in data['data']:
+                raise IdDoesNotExistError(
+                    f'The id {id!r} does noe exists in the DB')
+
+            data['data'][id] = {**data['data'][id], **new_data}
+
+            self._dump_file(data)
+            return data['data'][id]
