@@ -26,7 +26,7 @@ SingleDataType = Dict[
     ]
 ]
 
-Condition = Callable[[Dict[str, Any]], bool]
+QueryType = Callable[[Dict[str, Any]], bool]
 RetrunWithIdType = Dict[
     str, Dict[
         str, SimpleTypeGroup

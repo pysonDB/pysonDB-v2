@@ -2,6 +2,7 @@ import json
 import uuid
 from pathlib import Path
 from threading import Lock
+from typing import List
 from typing import Union
 
 
@@ -11,10 +12,10 @@ try:
 except ImportError:
     UJSON = False
 
-from pysondb.db_types import Condition
 from pysondb.db_types import DBSchemaType
 from pysondb.db_types import SingleDataType
 from pysondb.db_types import RetrunWithIdType
+from pysondb.db_types import QueryType
 from pysondb.errors import IdDoesNotExistError
 from pysondb.errors import SchemaTypeError
 from pysondb.errors import UnknownKeyError
@@ -156,10 +157,10 @@ class PysonDB:
                 raise SchemaTypeError(
                     '"data" key in the DB must be of type dict')
 
-    def get_by_query(self, condition: Condition) -> RetrunWithIdType:
-        if not callable(condition):
+    def get_by_query(self, query: QueryType) -> RetrunWithIdType:
+        if not callable(query):
             raise TypeError(
-                f'"condition" must be of type callable and not {type(condition)!r}')
+                f'"query" must be a callable and not {type(query)!r}')
 
         with self.lock:
             new_data: RetrunWithIdType = {}
@@ -167,7 +168,7 @@ class PysonDB:
             if isinstance(data, dict):
                 for id, values in data.items():
                     if isinstance(values, dict):
-                        if condition(values):
+                        if query(values):
                             new_data[id] = values
 
             return new_data
@@ -184,7 +185,7 @@ class PysonDB:
             if isinstance(keys, list):
                 if not all(i in keys for i in new_data):
                     raise UnknownKeyError(
-                        f'Unrecognized / missing key(s) {set(keys) ^ set(new_data.keys())}')
+                        f'Unrecognized key(s) {[i for i in new_data if i not in keys]}')
 
             if not isinstance(data['data'], dict):
                 raise SchemaTypeError(
@@ -198,3 +199,34 @@ class PysonDB:
 
             self._dump_file(data)
             return data['data'][id]
+
+    def update_by_query(self, query: QueryType, new_data: object) -> List[str]:
+        if not callable(query):
+            raise TypeError(
+                f'"query" must be a callable and not {type(query)!r}')
+
+        if not isinstance(new_data, dict):
+            raise TypeError(
+                f'"new_data" must be of type dict and not f{type(new_data)!r}')
+
+        with self.lock:
+            updated_keys = []
+            db_data = self._load_file()
+            keys = db_data['keys']
+
+            if isinstance(keys, list):
+                if not all(i in keys for i in new_data):
+                    raise UnknownKeyError(
+                        f'Unrecognized / missing key(s) {[i for i in new_data if i not in keys]}')
+
+            if not isinstance(db_data['data'], dict):
+                raise SchemaTypeError(
+                    'The data key in the DB must be of type dict')
+
+            for key, value in db_data['data'].items():
+                if query(value):
+                    db_data['data'][key] = {**db_data['data'][key], **new_data}
+                    updated_keys.append(key)
+
+            self._dump_file(db_data)
+            return updated_keys
