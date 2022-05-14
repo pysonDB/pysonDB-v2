@@ -1,4 +1,5 @@
 from typing import Any
+from typing import Callable
 from typing import Dict
 from typing import List
 from typing import Union
@@ -18,7 +19,16 @@ SimpleTypeGroup = Union[int, str, bool]
 
 SingleDataType = Dict[
     str, Union[
-        SimpleTypeGroup,
+        int,
+        str,
+        bool,
         List[SimpleTypeGroup]
+    ]
+]
+
+Condition = Callable[[Dict[str, Any]], bool]
+RetrunWithIdType = Dict[
+    str, Dict[
+        str, SimpleTypeGroup
     ]
 ]

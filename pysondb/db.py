@@ -11,8 +11,10 @@ try:
 except ImportError:
     UJSON = False
 
+from pysondb.db_types import Condition
 from pysondb.db_types import DBSchemaType
 from pysondb.db_types import SingleDataType
+from pysondb.db_types import RetrunWithIdType
 from pysondb.errors import IdDoesNotExistError
 from pysondb.errors import SchemaTypeError
 from pysondb.errors import UnknownKeyError
@@ -20,9 +22,10 @@ from pysondb.errors import UnknownKeyError
 
 class PysonDB:
 
-    def __init__(self, filename: str, thread_lock: bool = True) -> None:
+    def __init__(self, filename: str, auto_update: bool = True) -> None:
         self.filename = filename
-        self.thread_lock = thread_lock
+        self.auto_update = auto_update
+        self._au_memory = {'version': 2, 'keys': [], 'data': {}}
         self.lock = Lock()
 
         self._gen_db_file()
@@ -129,7 +132,7 @@ class PysonDB:
 
         return new_data if json_response else None
 
-    def get_all(self) -> SingleDataType:
+    def get_all(self) -> RetrunWithIdType:
         with self.lock:
             data = self._load_file()['data']
             if isinstance(data, dict):
@@ -152,3 +155,19 @@ class PysonDB:
             else:
                 raise SchemaTypeError(
                     '"data" key in the DB must be of type dict')
+
+    def get_by_query(self, condition: Condition) -> RetrunWithIdType:
+        if not callable(condition):
+            raise TypeError(
+                f'"condition" must be of type callable and not {type(condition)!r}')
+
+        with self.lock:
+            new_data: RetrunWithIdType = {}
+            data = self._load_file()['data']
+            if isinstance(data, dict):
+                for id, values in data.items():
+                    if isinstance(values, dict):
+                        if condition(values):
+                            new_data[id] = values
+
+            return new_data
