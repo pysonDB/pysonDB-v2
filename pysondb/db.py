@@ -286,3 +286,16 @@ class PysonDB:
 
             self._dump_file(data)
             return ids_to_delete
+
+    def purge(self) -> None:
+        with self.lock:
+            data = self._load_file()
+            if not isinstance(data['data'], dict):
+                raise SchemaTypeError(
+                    '"data" key in the DB must be of type dict')
+            if not isinstance(data['keys'], list):
+                raise SchemaTypeError(
+                    '"key" key in the DB must be of type dict')
+            data['data'] = {}
+            data['keys'] = []
+            self._dump_file(data)
