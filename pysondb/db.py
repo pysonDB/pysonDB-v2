@@ -88,11 +88,11 @@ class PysonDB:
             return None
 
         if not isinstance(data, list):
-            raise ValueError(
+            raise TypeError(
                 f'data must be of type "list" and not {type(data)}')
 
         if not all(isinstance(i, dict) for i in data):
-            raise ValueError(
+            raise TypeError(
                 'all the new data in the data list must of type dict')
 
         with self.lock:

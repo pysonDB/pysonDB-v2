@@ -110,11 +110,11 @@ def test_add_many_non_empty_file(tmpdir, mocker):
         {1, 2}
     )
 )
-def test_add_many_value_error_for_list(tmpdir, data):
+def test_add_many_type_error_for_list(tmpdir, data):
     f = tmpdir.join('test.json')
     db = PysonDB(f.strpath)
 
-    with pytest.raises(ValueError):
+    with pytest.raises(TypeError):
         db.add_many(data)
 
 
@@ -128,11 +128,11 @@ def test_add_many_value_error_for_list(tmpdir, data):
         [{1, 2}]
     )
 )
-def test_add_many_value_error_for_dict_in_list(tmpdir, data):
+def test_add_many_type_error_for_dict_in_list(tmpdir, data):
     f = tmpdir.join('test.json')
     db = PysonDB(f.strpath)
 
-    with pytest.raises(ValueError):
+    with pytest.raises(TypeError):
         db.add_many(data)
 
 
