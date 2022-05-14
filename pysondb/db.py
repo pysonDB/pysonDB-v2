@@ -266,3 +266,23 @@ class PysonDB:
             del data['data'][id]
 
             self._dump_file(data)
+
+    def delete_by_query(self, query: QueryType) -> List[str]:
+        if not callable(query):
+            raise TypeError(
+                f'"query" must be a callable and not {type(query)!r}')
+
+        with self.lock:
+            data = self._load_file()
+            if not isinstance(data['data'], dict):
+                raise SchemaTypeError(
+                    '"data" key in the DB must be of type dict')
+            ids_to_delete = []
+            for id, value in data['data'].items():
+                if query(value):
+                    ids_to_delete.append(id)
+            for id in ids_to_delete:
+                del data['data'][id]
+
+            self._dump_file(data)
+            return ids_to_delete
