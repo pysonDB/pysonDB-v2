@@ -1,5 +1,6 @@
 import json
 import uuid
+from copy import deepcopy
 from pathlib import Path
 from threading import Lock
 from typing import List
@@ -40,7 +41,7 @@ class PysonDB:
                 else:
                     return json.load(f)
         else:
-            return self._au_memory
+            return deepcopy(self._au_memory)
 
     def _dump_file(self, data: DBSchemaType) -> None:
         if self.auto_update:
@@ -50,7 +51,7 @@ class PysonDB:
                 else:
                     json.dump(data, f, indent=self.indent)
         else:
-            self._au_memory = data
+            self._au_memory = deepcopy(data)
         return None
 
     def _gen_db_file(self) -> None:
@@ -253,3 +254,15 @@ class PysonDB:
 
             self._dump_file(db_data)
             return updated_keys
+
+    def delete_by_id(self, id: str) -> None:
+        with self.lock:
+            data = self._load_file()
+            if not isinstance(data['data'], dict):
+                raise SchemaTypeError(
+                    '"data" key in the DB must be of type dict')
+            if id not in data['data']:
+                raise IdDoesNotExistError(f'ID {id} does not exists in the DB')
+            del data['data'][id]
+
+            self._dump_file(data)
