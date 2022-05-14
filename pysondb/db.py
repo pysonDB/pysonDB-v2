@@ -13,6 +13,7 @@ except ImportError:
 
 from pysondb.db_types import DBSchemaType
 from pysondb.db_types import SingleDataType
+from pysondb.errors import IdDoesNotExistError
 from pysondb.errors import SchemaTypeError
 from pysondb.errors import UnknownKeyError
 
@@ -134,3 +135,20 @@ class PysonDB:
             if isinstance(data, dict):
                 return data
         return {}
+
+    def get_by_id(self, id: str) -> SingleDataType:
+        if not isinstance(id, str):
+            raise TypeError(
+                f'id must be of type "str" and not {type(id)}')
+
+        with self.lock:
+            data = self._load_file()['data']
+            if isinstance(data, dict):
+                if id in data:
+                    return data[id]
+                else:
+                    raise IdDoesNotExistError(
+                        f'{id!r} does not exists in the DB')
+            else:
+                raise SchemaTypeError(
+                    '"data" key in the DB must be of type dict')
