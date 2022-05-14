@@ -28,7 +28,7 @@ def test_update_by_id(tmpdir):
     f.write(json.dumps(TEST_DATA))
     db = PysonDB(f.strpath)
 
-    db.update_up_id('1234567', {'age': 69})
+    db.update_by_id('1234567', {'age': 69})
     assert json.loads(f.read()) == {'version': 2, 'keys': ['age', 'name'], 'data': {'2352346': {
         'age': 4, 'name': 'mathew_first'}, '1234567': {'age': 69, 'name': 'new_user'}}}
 
@@ -39,7 +39,7 @@ def test_update_by_id_id_does_not_exists(tmpdir):
     db = PysonDB(f.strpath)
 
     with pytest.raises(IdDoesNotExistError):
-        db.update_up_id('23526556', {'age': 69})
+        db.update_by_id('23526556', {'age': 69})
 
 
 def test_update_by_id_unknown_key_error(tmpdir):
@@ -48,4 +48,4 @@ def test_update_by_id_unknown_key_error(tmpdir):
     db = PysonDB(f.strpath)
 
     with pytest.raises(UnknownKeyError):
-        db.update_up_id('534535', {'place': 'GB'})
+        db.update_by_id('534535', {'place': 'GB'})

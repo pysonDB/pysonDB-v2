@@ -197,7 +197,7 @@ class PysonDB:
 
             return new_data
 
-    def update_up_id(self, id: str, new_data: object) -> SingleDataType:
+    def update_by_id(self, id: str, new_data: object) -> SingleDataType:
         if not isinstance(new_data, dict):
             raise TypeError(
                 f'new_data must be of type dict and not {type(new_data)!r}')
