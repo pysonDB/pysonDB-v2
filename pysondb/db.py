@@ -23,40 +23,63 @@ from pysondb.errors import UnknownKeyError
 
 class PysonDB:
 
-    def __init__(self, filename: str, auto_update: bool = True) -> None:
+    def __init__(self, filename: str, auto_update: bool = True, indent: int = 4) -> None:
         self.filename = filename
         self.auto_update = auto_update
-        self._au_memory = {'version': 2, 'keys': [], 'data': {}}
+        self._au_memory: DBSchemaType = {'version': 2, 'keys': [], 'data': {}}
+        self.indent = indent
         self.lock = Lock()
 
         self._gen_db_file()
 
     def _load_file(self) -> DBSchemaType:
-        with open(self.filename, encoding='utf-8', mode='r') as f:
-            if UJSON:
-                return ujson.load(f)
-            else:
-                return json.load(f)
+        if self.auto_update:
+            with open(self.filename, encoding='utf-8', mode='r') as f:
+                if UJSON:
+                    return ujson.load(f)
+                else:
+                    return json.load(f)
+        else:
+            return self._au_memory
 
     def _dump_file(self, data: DBSchemaType) -> None:
-        with open(self.filename, encoding='utf-8', mode='w') as f:
-            if UJSON:
-                ujson.dump(data, f, indent=4)
-            else:
-                json.dump(data, f, indent=4)
+        if self.auto_update:
+            with open(self.filename, encoding='utf-8', mode='w') as f:
+                if UJSON:
+                    ujson.dump(data, f, indent=self.indent)
+                else:
+                    json.dump(data, f, indent=self.indent)
+        else:
+            self._au_memory = data
         return None
 
     def _gen_db_file(self) -> None:
-        if not Path(self.filename).is_file():
-            self.lock.acquire()
-            self._dump_file(
-                {'version': 2, 'keys': [], 'data': {}}
-            )
-            self.lock.release()
+        if self.auto_update:
+            if not Path(self.filename).is_file():
+                self.lock.acquire()
+                self._dump_file(
+                    {'version': 2, 'keys': [], 'data': {}}
+                )
+                self.lock.release()
 
     def _gen_id(self) -> str:
         # generates a random 18 digit uuid
         return str(int(uuid.uuid4()))[:18]
+
+    def force_load(self) -> None:
+        """
+        Used when the data from a file needs to be loaded when auto update is turned off.
+        """
+        t = self.auto_update
+        self.auto_update = True
+        self._au_memory = self._load_file()
+        self.auto_update = t
+
+    def commit(self) -> None:
+        t = self.auto_update  # prevent accidental commit calls from changing the auto update flag
+        self.auto_update = True
+        self._dump_file(self._au_memory)
+        self.auto_update = t
 
     def add(self, data: object) -> str:
         if not isinstance(data, dict):
