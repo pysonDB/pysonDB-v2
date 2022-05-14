@@ -1,8 +1,8 @@
-### the readme will be filled later
+## PysonDB-V2
 
-## still in dev, no PR are accepted for now.
+#### still in dev, no PR are accepted for now.
 
-## the possible schema
+## The new DB schema
 
 ```json
 
@@ -20,10 +20,318 @@
 
 ```
 
-in the latest update the key will be a str,
-and it does not need to be converted to a string to be used in JS apps.
+## quick walk through of all the methods
 
-### migrating to v2
+```python
+from pysondb import PysonDB
 
-all the methods name are PEP8 complaint.
-eg: addMany -> add_many so on and so forth.
+
+db = PysonDB('test.json')
+```
+
+```python
+!cat test.json
+```
+
+    {
+        "version": 2,
+        "keys": [],
+        "data": {}
+    }
+
+### add
+
+```python
+id = db.add({
+    'name': 'adwaith',
+    'age': 4,
+    'knows_python': True
+})
+print(id)
+```
+
+    231541323453553701
+
+```python
+!cat test.json
+```
+
+    {
+        "version": 2,
+        "keys": [
+            "age",
+            "knows_python",
+            "name"
+        ],
+        "data": {
+            "231541323453553701": {
+                "name": "adwaith",
+                "age": 4,
+                "knows_python": true
+            }
+        }
+    }
+
+## add_many
+
+```python
+added_values = db.add_many([
+    {
+        'name': 'fredy',
+        'age': 19,
+        'knows_python': True
+    },
+    {
+        'name': 'kenny',
+        'age': 19,
+        'knows_python': False
+    }
+])
+print(added_values)
+```
+
+    None
+
+```python
+added_values = db.add_many([
+    {
+        'name': 'mathew',
+        'age': 22,
+        'knows_python': False
+    },
+    {
+        'name': 'abi',
+        'age': 19,
+        'knows_python': True
+    }
+], json_response=True)
+print(added_values)
+```
+
+    {'330993934764646664': {'name': 'mathew', 'age': 22, 'knows_python': False}, '131457970736078364': {'name': 'abi', 'age': 19, 'knows_python': True}}
+
+```python
+!cat test.json
+```
+
+    {
+        "version": 2,
+        "keys": [
+            "age",
+            "knows_python",
+            "name"
+        ],
+        "data": {
+            "231541323453553701": {
+                "name": "adwaith",
+                "age": 4,
+                "knows_python": true
+            },
+            "263597723557497291": {
+                "name": "fredy",
+                "age": 19,
+                "knows_python": true
+            },
+            "299482429835276227": {
+                "name": "kenny",
+                "age": 19,
+                "knows_python": false
+            },
+            "330993934764646664": {
+                "name": "mathew",
+                "age": 22,
+                "knows_python": false
+            },
+            "131457970736078364": {
+                "name": "abi",
+                "age": 19,
+                "knows_python": true
+            }
+        }
+    }
+
+## get_by_id
+
+```python
+print(db.get_by_id('263597723557497291'))
+```
+
+    {'name': 'fredy', 'age': 19, 'knows_python': True}
+
+## get_by_query
+
+```python
+def age_divisible_by_2(data):
+    if data['age'] % 2 == 0:
+        return True
+
+print(db.get_by_query(query=age_divisible_by_2))
+```
+
+    {'231541323453553701': {'name': 'adwaith', 'age': 4, 'knows_python': True}, '330993934764646664': {'name': 'mathew', 'age': 22, 'knows_python': False}}
+
+## get_all
+
+```python
+print(db.get_all())
+```
+
+    {'231541323453553701': {'name': 'adwaith', 'age': 4, 'knows_python': True}, '263597723557497291': {'name': 'fredy', 'age': 19, 'knows_python': True}, '299482429835276227': {'name': 'kenny', 'age': 19, 'knows_python': False}, '330993934764646664': {'name': 'mathew', 'age': 22, 'knows_python': False}, '131457970736078364': {'name': 'abi', 'age': 19, 'knows_python': True}}
+
+## update_by_id
+
+```python
+updated_data = db.update_by_id('231541323453553701', {
+    'age': 18
+})
+print(updated_data)
+```
+
+    {'name': 'adwaith', 'age': 18, 'knows_python': True}
+
+## update_by_query
+
+```python
+updated_ids = db.update_by_query(
+    query=lambda x: x['name'] == 'abi',
+    new_data={'knows_python': False}
+)
+print(updated_ids)
+```
+
+    ['131457970736078364']
+
+```python
+!cat test.json
+```
+
+    {
+        "version": 2,
+        "keys": [
+            "age",
+            "knows_python",
+            "name"
+        ],
+        "data": {
+            "231541323453553701": {
+                "name": "adwaith",
+                "age": 18,
+                "knows_python": true
+            },
+            "263597723557497291": {
+                "name": "fredy",
+                "age": 19,
+                "knows_python": true
+            },
+            "299482429835276227": {
+                "name": "kenny",
+                "age": 19,
+                "knows_python": false
+            },
+            "330993934764646664": {
+                "name": "mathew",
+                "age": 22,
+                "knows_python": false
+            },
+            "131457970736078364": {
+                "name": "abi",
+                "age": 19,
+                "knows_python": false
+            }
+        }
+    }
+
+## delete_by_id
+
+```python
+db.delete_by_id('131457970736078364')  # delete abi
+```
+
+```python
+!cat test.json
+```
+
+    {
+        "version": 2,
+        "keys": [
+            "age",
+            "knows_python",
+            "name"
+        ],
+        "data": {
+            "231541323453553701": {
+                "name": "adwaith",
+                "age": 18,
+                "knows_python": true
+            },
+            "263597723557497291": {
+                "name": "fredy",
+                "age": 19,
+                "knows_python": true
+            },
+            "299482429835276227": {
+                "name": "kenny",
+                "age": 19,
+                "knows_python": false
+            },
+            "330993934764646664": {
+                "name": "mathew",
+                "age": 22,
+                "knows_python": false
+            }
+        }
+    }
+
+## delete_by_query
+
+```python
+ids = db.delete_by_query(lambda x: x['knows_python'] is False)
+print(ids)
+```
+
+    ['299482429835276227', '330993934764646664']
+
+```python
+!cat test.json
+```
+
+    {
+        "version": 2,
+        "keys": [
+            "age",
+            "knows_python",
+            "name"
+        ],
+        "data": {
+            "231541323453553701": {
+                "name": "adwaith",
+                "age": 18,
+                "knows_python": true
+            },
+            "263597723557497291": {
+                "name": "fredy",
+                "age": 19,
+                "knows_python": true
+            }
+        }
+    }
+
+## purge
+
+```python
+db.purge()
+```
+
+```python
+!cat test.json
+```
+
+    {
+        "version": 2,
+        "keys": [],
+        "data": {}
+    }
+
+```python
+
+```
