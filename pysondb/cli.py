@@ -5,6 +5,7 @@ from typing import Sequence
 
 from pysondb import db
 from pysondb.utils import migrate
+from pysondb.utils import print_db_as_table
 
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
@@ -20,6 +21,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         'new', help='the path to the file to put the db with the new schema')
     migrate_cmd.add_argument('--indent', type=int,
                              default=4, help='set the indent of the output DB')
+    show = sub.add_parser('show')
+    show.add_argument('db', help='the path to the db to print as a table')
 
     args = parser.parse_args(argv)
     if args.info:
@@ -36,6 +39,12 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         with open(args.new, 'w') as f:
             json.dump(new_data, f, indent=args.indent)
         return 0
+
+    if args.sub == 'show':
+        with open(args.db) as f:
+            content, code = print_db_as_table(json.load(f))
+            print(content)
+            return code
 
     return 0
 
