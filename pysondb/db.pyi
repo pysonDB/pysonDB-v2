@@ -13,16 +13,7 @@ class PysonDB:
 
     def _load_file(self) -> Dict[str, Union[int, List[str], Dict[str, Any]]]: ...
 
-    def _dump_file(self, data:  Dict[
-        str, Union[
-            int,
-            List[str],
-            Dict[
-                str, Any
-            ]
-        ]
-    ]
-    ) -> None: ...
+    def _dump_file(self, data:  Dict[str, Union[int, List[str], Dict[str, Any]]]) -> None: ...
 
     def _gen_db_file(self) -> None: ...
 
