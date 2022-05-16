@@ -14,6 +14,7 @@ except ImportError:
     UJSON = False
 
 from pysondb.db_types import DBSchemaType
+from pysondb.db_types import IdGeneratorType
 from pysondb.db_types import SingleDataType
 from pysondb.db_types import RetrunWithIdType
 from pysondb.db_types import QueryType
@@ -29,6 +30,7 @@ class PysonDB:
         self.auto_update = auto_update
         self._au_memory: DBSchemaType = {'version': 2, 'keys': [], 'data': {}}
         self.indent = indent
+        self._id_generator = self._gen_id
         self.lock = Lock()
 
         self._gen_db_file()
@@ -82,6 +84,9 @@ class PysonDB:
         self._dump_file(self._au_memory)
         self.auto_update = t
 
+    def set_id_generator(self, fn: IdGeneratorType) -> None:
+        self._id_generator = fn
+
     def add(self, data: object) -> str:
         if not isinstance(data, dict):
             raise TypeError(f'data must be of type dict and not {type(data)}')
@@ -102,7 +107,7 @@ class PysonDB:
                         '(Either the key(s) does not exists in the DB or is missing in the given data)'
                     )
 
-            _id = self._gen_id()
+            _id = str(self._id_generator())
             if not isinstance(db_data['data'], dict):
                 raise SchemaTypeError(
                     'data key in the db must be of type "dict"')
@@ -149,7 +154,7 @@ class PysonDB:
                     'data key in the db must be of type "dict"')
 
             for d in data:
-                _id = self._gen_id()
+                _id = str(self._id_generator())
                 db_data['data'][_id] = d
                 if json_response:
                     new_data[_id] = d
