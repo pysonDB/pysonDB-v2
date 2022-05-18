@@ -73,16 +73,16 @@ class PysonDB:
         """
         Used when the data from a file needs to be loaded when auto update is turned off.
         """
-        t = self.auto_update
-        self.auto_update = True
-        self._au_memory = self._load_file()
-        self.auto_update = t
+        if not self.auto_update:
+            self.auto_update = True
+            self._au_memory = self._load_file()
+            self.auto_update = False
 
     def commit(self) -> None:
-        t = self.auto_update  # prevent accidental commit calls from changing the auto update flag
-        self.auto_update = True
-        self._dump_file(self._au_memory)
-        self.auto_update = t
+        if not self.auto_update:
+            self.auto_update = True
+            self._dump_file(self._au_memory)
+            self.auto_update = False
 
     def set_id_generator(self, fn: IdGeneratorType) -> None:
         self._id_generator = fn
