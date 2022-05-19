@@ -9,6 +9,7 @@ from pysondb import db
 from pysondb.utils import merge_n_db
 from pysondb.utils import migrate
 from pysondb.utils import print_db_as_table
+from pysondb.utils import purge_db
 
 try:
     import ujson as json  # type:ignore  # noqa: F811
@@ -40,6 +41,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     to_csv.add_argument('db_file', help='The DB file to convert to CSV')
     to_csv.add_argument(
         '--output', '-o', help='The name fo the output csv file')
+    purge = sub.add_parser('purge')
+    purge.add_argument('db_file', help='The DB file to purge')
 
     args = parser.parse_args(argv)
     if args.info:
@@ -90,6 +93,12 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 if isinstance(db_data['data'], dict):
                     for k, v in db_data['data'].items():
                         csv_write.writerow([k, *[v[i] for i in keys[1:]]])
+        return 0
+
+    if args.sub == 'purge':
+        with open(args.db_file, mode='w', encoding='utf-8') as f:
+            new_p_data = purge_db({})
+            json.dump(new_p_data, f)
         return 0
     return 0
 

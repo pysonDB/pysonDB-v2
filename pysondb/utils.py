@@ -84,3 +84,8 @@ def merge_n_db(*dbs: DBSchemaType) -> Tuple[DBSchemaType, str, int]:
     new_db['keys'] = keys
     new_db['data'] = data
     return new_db, '', 0
+
+
+def purge_db(_: Any) -> DBSchemaType:
+    data: DBSchemaType = {'version': 2, 'keys': [], 'data': {}}
+    return data
