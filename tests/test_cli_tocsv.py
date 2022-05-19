@@ -44,4 +44,4 @@ def test_tocsv(tmpdir):
     f1.write(json.dumps(TEST_DATA))
 
     assert main(('tocsv', f1.strpath, '-o', f2.strpath)) == 0
-    assert f2.read() == TEST_OUTPUT
+    assert f2.read().replace('\n', '') == TEST_OUTPUT.replace('\n', '')
