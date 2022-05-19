@@ -10,6 +10,9 @@ try:
 except ImportError:
     PRETTYTABLE = False
 
+from pysondb.db_types import DBSchemaType
+from pysondb.db_types import SingleDataType
+
 
 OldDataType = Dict[str, List[Dict[str, Any]]]
 NewDataType = Dict[
@@ -61,3 +64,23 @@ def print_db_as_table(data: NewDataType) -> Tuple[str, int]:
             return x.get_string(), 0
 
     return '', 0
+
+
+def merge_n_db(*dbs: DBSchemaType) -> Tuple[DBSchemaType, str, int]:
+    keys: List[str] = []
+    new_db: DBSchemaType = {}
+    data: Dict[str, SingleDataType] = {}
+    for db in dbs:
+        if isinstance(db['keys'], list):
+            if not keys:
+                keys = db['keys']
+            if db['keys'] != keys:
+                return {}, 'All the DB\'s must have the same keys', 1
+
+        if isinstance(db['data'], dict):
+            data = {**data, **db['data']}
+
+    new_db['version'] = 2
+    new_db['keys'] = keys
+    new_db['data'] = data
+    return new_db, '', 0
