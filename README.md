@@ -1,7 +1,5 @@
 ## PysonDB-V2
 
-#### still in dev, no PR are accepted for now.
-
 ## The new DB schema
 
 ```json
@@ -332,6 +330,4 @@ db.purge()
         "data": {}
     }
 
-```python
-
-```
+For more docs click [here](https://github.com/pysonDB/pysonDB-v2/tree/master/docs)
