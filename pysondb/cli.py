@@ -1,4 +1,5 @@
 import argparse
+import csv
 import json
 import sys
 from typing import Optional
@@ -35,6 +36,10 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     merge.add_argument('filenames', nargs='*')
     merge.add_argument('--output', '-o', required=True,
                        help='The name of the output JSON file.')
+    to_csv = sub.add_parser('tocsv')
+    to_csv.add_argument('db_file', help='The DB file to convert to CSV')
+    to_csv.add_argument(
+        '--output', '-o', help='The name fo the output csv file')
 
     args = parser.parse_args(argv)
     if args.info:
@@ -74,6 +79,18 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 print('DB\'s merged successfully')
                 return err_code
 
+    if args.sub == 'tocsv':
+        with open(args.db_file, encoding='utf-8') as f:
+            with open(args.output, 'w', encoding='utf-8') as o:
+                csv_write = csv.writer(o)
+                db_data = json.load(f)
+                if isinstance(db_data['keys'], list):
+                    keys = ['id'] + sorted(db_data['keys'])
+                    csv_write.writerow(keys)
+                if isinstance(db_data['data'], dict):
+                    for k, v in db_data['data'].items():
+                        csv_write.writerow([k, *[v[i] for i in keys[1:]]])
+        return 0
     return 0
 
 
