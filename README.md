@@ -18,7 +18,7 @@
 
 ```
 
-## quick walk through of all the methods
+## Quick walk through of all the methods
 
 ```python
 from pysondb import PysonDB
