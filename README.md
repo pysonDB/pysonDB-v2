@@ -1,6 +1,6 @@
 ## PysonDB-V2
 
-## The new DB schema
+## The DB schema
 
 ```json
 
