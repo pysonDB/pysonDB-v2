@@ -23,25 +23,25 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                         help='Get the pysondb version info and the JSON parser info')
 
     sub = parser.add_subparsers(dest='sub')
-    migrate_cmd = sub.add_parser('migrate')
+    migrate_cmd = sub.add_parser('migrate', help='convert a v1 DB to v2')
     migrate_cmd.add_argument(
         'old', help='the path to the db with the old schema')
     migrate_cmd.add_argument(
         'new', help='the path to the file to put the db with the new schema')
     migrate_cmd.add_argument('--indent', type=int,
                              default=4, help='set the indent of the output DB')
-    show = sub.add_parser('show')
+    show = sub.add_parser('show', help='Pretty print a DB')
     show.add_argument('db', help='the path to the db to print as a table')
     merge = sub.add_parser(
         'merge', help='merge two or more DB with the same keys')
     merge.add_argument('filenames', nargs='*')
     merge.add_argument('--output', '-o', required=True,
                        help='The name of the output JSON file.')
-    to_csv = sub.add_parser('tocsv')
+    to_csv = sub.add_parser('tocsv', help='convert the DB to a csv file')
     to_csv.add_argument('db_file', help='The DB file to convert to CSV')
     to_csv.add_argument(
         '--output', '-o', help='The name fo the output csv file')
-    purge = sub.add_parser('purge')
+    purge = sub.add_parser('purge', help='purge / empty the whole DB')
     purge.add_argument('db_file', help='The DB file to purge')
 
     args = parser.parse_args(argv)
