@@ -18,7 +18,7 @@ from pysondb.db_types import DBSchemaType
 from pysondb.db_types import IdGeneratorType
 from pysondb.db_types import NewKeyValidTypes
 from pysondb.db_types import SingleDataType
-from pysondb.db_types import RetrunWithIdType
+from pysondb.db_types import ReturnWithIdType
 from pysondb.db_types import QueryType
 from pysondb.errors import IdDoesNotExistError
 from pysondb.errors import SchemaTypeError
@@ -164,7 +164,7 @@ class PysonDB:
 
         return new_data if json_response else None
 
-    def get_all(self) -> RetrunWithIdType:
+    def get_all(self) -> ReturnWithIdType:
         with self.lock:
             data = self._load_file()['data']
             if isinstance(data, dict):
@@ -188,13 +188,13 @@ class PysonDB:
                 raise SchemaTypeError(
                     '"data" key in the DB must be of type dict')
 
-    def get_by_query(self, query: QueryType) -> RetrunWithIdType:
+    def get_by_query(self, query: QueryType) -> ReturnWithIdType:
         if not callable(query):
             raise TypeError(
                 f'"query" must be a callable and not {type(query)!r}')
 
         with self.lock:
-            new_data: RetrunWithIdType = {}
+            new_data: ReturnWithIdType = {}
             data = self._load_file()['data']
             if isinstance(data, dict):
                 for id, values in data.items():

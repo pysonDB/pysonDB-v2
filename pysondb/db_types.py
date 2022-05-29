@@ -28,7 +28,7 @@ SingleDataType = Dict[
 
 QueryType = Callable[[Dict[str, Any]], bool]
 IdGeneratorType = Callable[[], str]
-RetrunWithIdType = Dict[
+ReturnWithIdType = Dict[
     str, Dict[
         str, SimpleTypeGroup
     ]
