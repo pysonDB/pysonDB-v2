@@ -33,3 +33,4 @@ RetrunWithIdType = Dict[
         str, SimpleTypeGroup
     ]
 ]
+NewKeyValidTypes = Union[List, Dict, str, int, bool]

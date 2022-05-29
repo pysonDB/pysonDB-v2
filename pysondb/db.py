@@ -4,6 +4,7 @@ from copy import deepcopy
 from pathlib import Path
 from threading import Lock
 from typing import List
+from typing import Optional
 from typing import Union
 
 
@@ -15,6 +16,7 @@ except ImportError:
 
 from pysondb.db_types import DBSchemaType
 from pysondb.db_types import IdGeneratorType
+from pysondb.db_types import NewKeyValidTypes
 from pysondb.db_types import SingleDataType
 from pysondb.db_types import RetrunWithIdType
 from pysondb.db_types import QueryType
@@ -303,4 +305,23 @@ class PysonDB:
                     '"key" key in the DB must be of type dict')
             data['data'] = {}
             data['keys'] = []
+            self._dump_file(data)
+
+    def add_new_key(self, key: str, default: Optional[NewKeyValidTypes] = None) -> None:
+
+        if default is not None:
+            if not isinstance(default, (list, str, int, bool, dict)):
+                raise TypeError(
+                    f'default field must be of any of (list, int, str, bool, dict) but for {type(default)}')
+
+        with self.lock:
+            data = self._load_file()
+            if isinstance(data['keys'], list):
+                data['keys'].append(key)
+                data['keys'].sort()
+
+            if isinstance(data['data'], dict):
+                for d in data['data'].values():
+                    d[key] = default
+
             self._dump_file(data)
