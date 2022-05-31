@@ -108,6 +108,7 @@ class PysonDB:
                         f'Unrecognized / missing key(s) {set(keys) ^ set(data.keys())}'
                         '(Either the key(s) does not exists in the DB or is missing in the given data)'
                     )
+
             if _id == None:
                 _id = str(self._id_generator())
             if not isinstance(db_data['data'], dict):
