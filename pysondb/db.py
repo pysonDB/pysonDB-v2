@@ -89,7 +89,7 @@ class PysonDB:
     def set_id_generator(self, fn: IdGeneratorType) -> None:
         self._id_generator = fn
 
-    def add(self, data: object) -> str:
+    def add(self, data: object, *, _id: str = None) -> str:
         if not isinstance(data, dict):
             raise TypeError(f'data must be of type dict and not {type(data)}')
 
@@ -108,8 +108,8 @@ class PysonDB:
                         f'Unrecognized / missing key(s) {set(keys) ^ set(data.keys())}'
                         '(Either the key(s) does not exists in the DB or is missing in the given data)'
                     )
-
-            _id = str(self._id_generator())
+            if _id == None:
+                _id = str(self._id_generator())
             if not isinstance(db_data['data'], dict):
                 raise SchemaTypeError(
                     'data key in the db must be of type "dict"')
