@@ -1,0 +1,76 @@
+site_name: PysonDB-V2
+nav:
+    - Home: 'home.md'
+    - 'Docs': 'index.md'
+    - 'Issue Tracker': 'https://github.com/pysonDB/pysonDB-v2/issues'
+    - 'Github': 'https://github.com/pysonDB/pysonDB-v2'
+    - 'PysonDB-V1': 'https://github.com/pysonDB/pysonDB'
+
+
+# Repository
+repo_name: pysonDB/pysonDB-V2
+repo_url: https://github.com/pysonDB/pysonDB-V2
+markdown_extensions:
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences
+theme:
+  name: material
+
+  # Don't include MkDocs' JavaScript
+  include_search_page: false
+  search_index_only: true
+
+  # Default values, taken from mkdocs_theme.yml
+  language: en
+  features:
+    - content.code.annotate
+    # - content.tabs.link
+    - content.tooltips
+    # - header.autohide
+    # - navigation.expand
+    - navigation.indexes
+    # - navigation.instant
+    # - navigation.prune
+    - navigation.sections
+    - navigation.tabs
+    # - navigation.tabs.sticky
+    - navigation.top
+    - navigation.tracking
+    - search.highlight
+    - search.share
+    - search.suggest
+    - toc.follow
+    # - toc.integrate
+  palette:
+    - scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/toggle-switch
+        name: Switch to dark mode
+    - scheme: slate
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/toggle-switch-off-outline
+        name: Switch to light mode
+  font:
+    text: Roboto
+    code: Roboto Mono
+  favicon: assets/favicon.png
+  icon:
+    logo: logo
+# Customization
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/pysonDB
+    - icon: fontawesome/brands/python
+      link: https://pypi.org/project/pysondb-v2/
+
+
+# Copyright
+copyright: Copyright &copy; 2020 - 2022 PysonDB
