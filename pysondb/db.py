@@ -1,12 +1,19 @@
 import json
 import uuid
+
 from copy import deepcopy
 from pathlib import Path
 from threading import Lock
-from typing import List
-from typing import Optional
-from typing import Union
+from typing import List, Optional, Union
 
+from pysondb.db_types import (
+    DBSchemaType, IdGeneratorType, NewKeyValidTypes,
+    QueryType, ReturnWithIdType, SingleDataType
+)
+from pysondb.errors import (
+    IdDoesNotExistError, SchemaTypeError,
+    UnknownKeyError
+)
 
 try:
     import ujson
@@ -14,19 +21,7 @@ try:
 except ImportError:
     UJSON = False
 
-from pysondb.db_types import DBSchemaType
-from pysondb.db_types import IdGeneratorType
-from pysondb.db_types import NewKeyValidTypes
-from pysondb.db_types import SingleDataType
-from pysondb.db_types import ReturnWithIdType
-from pysondb.db_types import QueryType
-from pysondb.errors import IdDoesNotExistError
-from pysondb.errors import SchemaTypeError
-from pysondb.errors import UnknownKeyError
-
-
 class PysonDB:
-
     def __init__(self, filename: str, auto_update: bool = True, indent: int = 4) -> None:
         self.filename = filename
         self.auto_update = auto_update

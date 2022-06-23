@@ -2,14 +2,10 @@ import argparse
 import csv
 import json
 import sys
-from typing import Optional
-from typing import Sequence
+from typing import Optional, Sequence
 
 from pysondb import db
-from pysondb.utils import merge_n_db
-from pysondb.utils import migrate
-from pysondb.utils import print_db_as_table
-from pysondb.utils import purge_db
+from pysondb.utils import merge_n_db, migrate, print_db_as_table, purge_db
 
 try:
     import ujson as json  # type:ignore  # noqa: F811

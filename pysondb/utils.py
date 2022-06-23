@@ -1,17 +1,12 @@
-from typing import Any
-from typing import Dict
-from typing import List
-from typing import Tuple
-from typing import Union
+from typing import Any, Dict, List, Tuple, Union
+
+from pysondb.db_types import DBSchemaType, SingleDataType
 
 try:
     from prettytable import PrettyTable
     PRETTYTABLE = True
 except ImportError:
     PRETTYTABLE = False
-
-from pysondb.db_types import DBSchemaType
-from pysondb.db_types import SingleDataType
 
 
 OldDataType = Dict[str, List[Dict[str, Any]]]
