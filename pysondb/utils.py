@@ -1,6 +1,6 @@
 from typing import Any, Dict, List, Tuple, Union
 
-from pysondb.db_types import DBSchemaType, SingleDataType
+from pysondb.db_types import DB_SCHEMA, SINGLE_DATA_TYPE
 
 try:
     from prettytable import PrettyTable
@@ -9,8 +9,8 @@ except ImportError:
     PRETTYTABLE = False
 
 
-OldDataType = Dict[str, List[Dict[str, Any]]]
-NewDataType = Dict[
+OLD_DATA_TYPE = Dict[str, List[Dict[str, Any]]]
+NEW_DATA_TYPE = Dict[
     str,
     Union[
         int,
@@ -24,8 +24,8 @@ NewDataType = Dict[
 ]
 
 
-def migrate(old_db_data: OldDataType) -> NewDataType:
-    new_data: NewDataType = {'version': 2, 'keys': [], 'data': {}}
+def migrate(old_db_data: OLD_DATA_TYPE) -> NEW_DATA_TYPE:
+    new_data: NEW_DATA_TYPE = {'version': 2, 'keys': [], 'data': {}}
 
     if not old_db_data['data']:
         return new_data
@@ -42,7 +42,7 @@ def migrate(old_db_data: OldDataType) -> NewDataType:
     return new_data
 
 
-def print_db_as_table(data: NewDataType) -> Tuple[str, int]:
+def print_db_as_table(data: NEW_DATA_TYPE) -> Tuple[str, int]:
     if not PRETTYTABLE:
         return 'install prettytable (pip3 install prettytable) to run the following command', 1
     if 'version' not in data:
@@ -61,10 +61,10 @@ def print_db_as_table(data: NewDataType) -> Tuple[str, int]:
     return '', 0
 
 
-def merge_n_db(*dbs: DBSchemaType) -> Tuple[DBSchemaType, str, int]:
+def merge_n_db(*dbs: DB_SCHEMA) -> Tuple[DB_SCHEMA, str, int]:
     keys: List[str] = []
-    new_db: DBSchemaType = {}
-    data: Dict[str, SingleDataType] = {}
+    new_db: DB_SCHEMA = {}
+    data: Dict[str, SINGLE_DATA_TYPE] = {}
     for db in dbs:
         if isinstance(db['keys'], list):
             if not keys:
@@ -81,6 +81,6 @@ def merge_n_db(*dbs: DBSchemaType) -> Tuple[DBSchemaType, str, int]:
     return new_db, '', 0
 
 
-def purge_db(_: Any) -> DBSchemaType:
-    data: DBSchemaType = {'version': 2, 'keys': [], 'data': {}}
+def purge_db(_: Any) -> DB_SCHEMA:
+    data: DB_SCHEMA = {'version': 2, 'keys': [], 'data': {}}
     return data

@@ -1,6 +1,6 @@
 from typing import Any, Callable, Dict, List, Union
 
-DBSchemaType = Dict[
+DB_SCHEMA = Dict[
     str, Union[
         int,
         List[str],
@@ -10,22 +10,22 @@ DBSchemaType = Dict[
     ]
 ]
 
-SimpleTypeGroup = Union[int, str, bool]
+SIMPLE_TYPE_GROUP = Union[int, str, bool]
 
-SingleDataType = Dict[
+SINGLE_DATA_TYPE = Dict[
     str, Union[
         int,
         str,
         bool,
-        List[SimpleTypeGroup]
+        List[SIMPLE_TYPE_GROUP]
     ]
 ]
 
-QueryType = Callable[[Dict[str, Any]], bool]
-IdGeneratorType = Callable[[], str]
-ReturnWithIdType = Dict[
+QUERY_TYPE = Callable[[Dict[str, Any]], bool]
+ID_GENERATOR_TYPE = Callable[[], str]
+RETURN_WITH_ID_TYPE = Dict[
     str, Dict[
-        str, SimpleTypeGroup
+        str, SIMPLE_TYPE_GROUP
     ]
 ]
-NewKeyValidTypes = Union[List, Dict, str, int, bool]
+NEW_KEY_VALID_TYPES = Union[List, Dict, str, int, bool]

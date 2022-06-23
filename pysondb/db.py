@@ -7,8 +7,8 @@ from threading import Lock
 from typing import List, Optional, Union
 
 from pysondb.db_types import (
-    DBSchemaType, IdGeneratorType, NewKeyValidTypes,
-    QueryType, ReturnWithIdType, SingleDataType
+    DB_SCHEMA, ID_GENERATOR_TYPE, NEW_KEY_VALID_TYPES,
+    QUERY_TYPE, RETURN_WITH_ID_TYPE, SINGLE_DATA_TYPE
 )
 from pysondb.errors import (
     IdDoesNotExistError, SchemaTypeError,
@@ -16,42 +16,34 @@ from pysondb.errors import (
 )
 
 try:
-    import ujson
-    UJSON = True
+    import ujson as json  # type:ignore  # noqa: F811
 except ImportError:
-    UJSON = False
+    import json
 
 class PysonDB:
     def __init__(self, filename: str, auto_update: bool = True, indent: int = 4) -> None:
         self.filename = filename
         self.auto_update = auto_update
-        self._au_memory: DBSchemaType = {'version': 2, 'keys': [], 'data': {}}
+        self._au_memory: DB_SCHEMA = {'version': 2, 'keys': [], 'data': {}}
         self.indent = indent
         self._id_generator = self._gen_id
         self.lock = Lock()
 
         self._gen_db_file()
 
-    def _load_file(self) -> DBSchemaType:
+    def _load_file(self) -> DB_SCHEMA:
         if self.auto_update:
             with open(self.filename, encoding='utf-8', mode='r') as f:
-                if UJSON:
-                    return ujson.load(f)
-                else:
-                    return json.load(f)
-        else:
-            return deepcopy(self._au_memory)
+                return json.load(f)
 
-    def _dump_file(self, data: DBSchemaType) -> None:
+        return deepcopy(self._au_memory)
+
+    def _dump_file(self, data: DB_SCHEMA) -> None:
         if self.auto_update:
             with open(self.filename, encoding='utf-8', mode='w') as f:
-                if UJSON:
-                    ujson.dump(data, f, indent=self.indent)
-                else:
-                    json.dump(data, f, indent=self.indent)
+                json.dump(data, f, indent=self.indent)
         else:
             self._au_memory = deepcopy(data)
-        return None
 
     def _gen_db_file(self) -> None:
         if self.auto_update:
@@ -81,7 +73,7 @@ class PysonDB:
             self._dump_file(self._au_memory)
             self.auto_update = False
 
-    def set_id_generator(self, fn: IdGeneratorType) -> None:
+    def set_id_generator(self, fn: ID_GENERATOR_TYPE) -> None:
         self._id_generator = fn
 
     def add(self, data: object) -> str:
@@ -113,7 +105,7 @@ class PysonDB:
             self._dump_file(db_data)
             return _id
 
-    def add_many(self, data: object, json_response: bool = False) -> Union[SingleDataType, None]:
+    def add_many(self, data: object, json_response: bool = False) -> Union[SINGLE_DATA_TYPE, None]:
 
         if not data:
             return None
@@ -127,7 +119,7 @@ class PysonDB:
                 'all the new data in the data list must of type dict')
 
         with self.lock:
-            new_data: SingleDataType = {}
+            new_data: SINGLE_DATA_TYPE = {}
             db_data = self._load_file()
 
             # verify all the keys in all the dicts in the list are valid
@@ -159,14 +151,14 @@ class PysonDB:
 
         return new_data if json_response else None
 
-    def get_all(self) -> ReturnWithIdType:
+    def get_all(self) -> RETURN_WITH_ID_TYPE:
         with self.lock:
             data = self._load_file()['data']
             if isinstance(data, dict):
                 return data
         return {}
 
-    def get_by_id(self, id: str) -> SingleDataType:
+    def get_by_id(self, id: str) -> SINGLE_DATA_TYPE:
         if not isinstance(id, str):
             raise TypeError(
                 f'id must be of type "str" and not {type(id)}')
@@ -183,13 +175,13 @@ class PysonDB:
                 raise SchemaTypeError(
                     '"data" key in the DB must be of type dict')
 
-    def get_by_query(self, query: QueryType) -> ReturnWithIdType:
+    def get_by_query(self, query: QUERY_TYPE) -> RETURN_WITH_ID_TYPE:
         if not callable(query):
             raise TypeError(
                 f'"query" must be a callable and not {type(query)!r}')
 
         with self.lock:
-            new_data: ReturnWithIdType = {}
+            new_data: RETURN_WITH_ID_TYPE = {}
             data = self._load_file()['data']
             if isinstance(data, dict):
                 for id, values in data.items():
@@ -199,7 +191,7 @@ class PysonDB:
 
             return new_data
 
-    def update_by_id(self, id: str, new_data: object) -> SingleDataType:
+    def update_by_id(self, id: str, new_data: object) -> SINGLE_DATA_TYPE:
         if not isinstance(new_data, dict):
             raise TypeError(
                 f'new_data must be of type dict and not {type(new_data)!r}')
@@ -226,7 +218,7 @@ class PysonDB:
             self._dump_file(data)
             return data['data'][id]
 
-    def update_by_query(self, query: QueryType, new_data: object) -> List[str]:
+    def update_by_query(self, query: QUERY_TYPE, new_data: object) -> List[str]:
         if not callable(query):
             raise TypeError(
                 f'"query" must be a callable and not {type(query)!r}')
@@ -269,7 +261,7 @@ class PysonDB:
 
             self._dump_file(data)
 
-    def delete_by_query(self, query: QueryType) -> List[str]:
+    def delete_by_query(self, query: QUERY_TYPE) -> List[str]:
         if not callable(query):
             raise TypeError(
                 f'"query" must be a callable and not {type(query)!r}')
@@ -302,7 +294,7 @@ class PysonDB:
             data['keys'] = []
             self._dump_file(data)
 
-    def add_new_key(self, key: str, default: Optional[NewKeyValidTypes] = None) -> None:
+    def add_new_key(self, key: str, default: Optional[NEW_KEY_VALID_TYPES] = None) -> None:
 
         if default is not None:
             if not isinstance(default, (list, str, int, bool, dict)):

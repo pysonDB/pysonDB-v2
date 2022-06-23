@@ -2,10 +2,10 @@ import json
 from pathlib import Path
 
 from pysondb.db import PysonDB
-from pysondb.db_types import DBSchemaType
+from pysondb.db_types import DB_SCHEMA
 
 
-SAMPLE_DATA: DBSchemaType = {
+SAMPLE_DATA: DB_SCHEMA = {
     'version': 2,
     'keys': ['a', 'b', 'c'],
     'data': {
