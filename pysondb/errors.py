@@ -1,22 +1,18 @@
-class UnknownKeyError(Exception):
+class PysonException(Exception):
+    """ Base exception class for PysonDB """
+
     def __init__(self, message: str) -> None:
-        self.message = message
+        self.message: str = message
 
     def __str__(self) -> str:
-        return str(self.message)
+        return self.message
+
+class UnknownKeyError(PysonException):
+    """ Unknown key error """
 
 
-class SchemaTypeError(Exception):
-    def __init__(self, message: str) -> None:
-        self.message = message
+class SchemaTypeError(PysonException):
+    """ Schema type error """
 
-    def __str__(self) -> str:
-        return str(self.message)
-
-
-class IdDoesNotExistError(Exception):
-    def __init__(self, message: str) -> None:
-        self.message = message
-
-    def __str__(self) -> str:
-        return str(self.message)
+class IdDoesNotExistError(PysonException):
+    """ ID does not exist error """
