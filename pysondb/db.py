@@ -99,7 +99,7 @@ class PysonDB:
             keys = db_data['keys']
             if not isinstance(keys, list):
                 raise SchemaTypeError(
-                    f"keys must of type 'list' and not {type(keys)}")
+                    f"keys must be of type 'list' and not {type(keys)}")
             if len(keys) == 0:
                 db_data['keys'] = sorted(list(data.keys()))
             else:
@@ -163,6 +163,23 @@ class PysonDB:
             self._dump_file(db_data)
 
         return new_data if json_response else None
+
+    def get_all_select_keys(self, keys: List[str]) -> ReturnWithIdType:
+        with self.lock:
+            file_data = self._load_file()
+            data = file_data['data']
+            existing_keys = file_data['keys']
+            if not isinstance(existing_keys, list):
+                raise SchemaTypeError(
+                    f"keys must be of type 'list' and not {type(existing_keys)}")
+            if not set(keys).issubset(existing_keys):
+                raise UnknownKeyError(
+                    f'Unrecognized key(s) {set(keys) ^ set(existing_keys)}'
+                    '(Unable to find the key(s) in the DB)'
+                )
+            if isinstance(data, dict):
+                return {k: {i: v[i] for i in keys} for k, v in data.items()}
+        return {}
 
     def get_all(self) -> ReturnWithIdType:
         with self.lock:
