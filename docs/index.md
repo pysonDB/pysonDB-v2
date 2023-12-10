@@ -1,22 +1,6 @@
-## PysonDB-V2
+# PysonDB-V2
 
-## The DB schema
 
-```json
-
-{
-    "version": 2,
-    "keys" ["a", "b", "c"],
-    "data": {
-        "384753047545745": {
-            "a": 1,
-            "b": "something",
-            "c": true
-        }
-    }
-}
-
-```
 
 ## Quick walk through of all the methods
 
@@ -37,15 +21,17 @@ db = PysonDB('test.json')
         "data": {}
     }
 
-### add
+## add
 
-```python
+```py linenums="1"
+
 id = db.add({
     'name': 'adwaith',
     'age': 4,
     'knows_python': True
 })
 print(id)
+
 ```
 
     231541323453553701
@@ -72,7 +58,7 @@ print(id)
 
 ## add_many
 
-```python
+```py linenums="1"
 added_values = db.add_many([
     {
         'name': 'fredy',
@@ -90,7 +76,7 @@ print(added_values)
 
     None
 
-```python
+```py linenums="1"
 added_values = db.add_many([
     {
         'name': 'mathew',
@@ -150,7 +136,7 @@ print(added_values)
 
 ## get_by_id
 
-```python
+```py linenums="1"
 print(db.get_by_id('263597723557497291'))
 ```
 
@@ -158,7 +144,7 @@ print(db.get_by_id('263597723557497291'))
 
 ## get_by_query
 
-```python
+```py linenums="1"
 def age_divisible_by_2(data):
     if data['age'] % 2 == 0:
         return True
@@ -170,15 +156,44 @@ print(db.get_by_query(query=age_divisible_by_2))
 
 ## get_all
 
-```python
+```py linenums="1"
 print(db.get_all())
+
+```
 ```
 
-    {'231541323453553701': {'name': 'adwaith', 'age': 4, 'knows_python': True}, '263597723557497291': {'name': 'fredy', 'age': 19, 'knows_python': True}, '299482429835276227': {'name': 'kenny', 'age': 19, 'knows_python': False}, '330993934764646664': {'name': 'mathew', 'age': 22, 'knows_python': False}, '131457970736078364': {'name': 'abi', 'age': 19, 'knows_python': True}}
+{
+   "231541323453553701":{
+      "name":"adwaith",
+      "age":4,
+      "knows_python":true
+   },
+   "263597723557497291":{
+      "name":"fredy",
+      "age":19,
+      "knows_python":true
+   },
+   "299482429835276227":{
+      "name":"kenny",
+      "age":19,
+      "knows_python":false
+   },
+   "330993934764646664":{
+      "name":"mathew",
+      "age":22,
+      "knows_python":false
+   },
+   "131457970736078364":{
+      "name":"abi",
+      "age":19,
+      "knows_python":true
+   }
+}
+```
 
 ## update_by_id
 
-```python
+```py linenums="1"
 updated_data = db.update_by_id('231541323453553701', {
     'age': 18
 })
@@ -189,7 +204,7 @@ print(updated_data)
 
 ## update_by_query
 
-```python
+```py linenums="1"
 updated_ids = db.update_by_query(
     query=lambda x: x['name'] == 'abi',
     new_data={'knows_python': False}
@@ -199,7 +214,7 @@ print(updated_ids)
 
     ['131457970736078364']
 
-```python
+```py linenums="1"
 !cat test.json
 ```
 
@@ -241,11 +256,11 @@ print(updated_ids)
 
 ## delete_by_id
 
-```python
+```py linenums="1"
 db.delete_by_id('131457970736078364')  # delete abi
 ```
 
-```python
+```py linenums="1"
 !cat test.json
 ```
 
@@ -282,14 +297,14 @@ db.delete_by_id('131457970736078364')  # delete abi
 
 ## delete_by_query
 
-```python
+```py linenums="1"
 ids = db.delete_by_query(lambda x: x['knows_python'] is False)
 print(ids)
 ```
 
     ['299482429835276227', '330993934764646664']
 
-```python
+```py linenums="1"
 !cat test.json
 ```
 
@@ -316,11 +331,11 @@ print(ids)
 
 ## purge
 
-```python
+```py linenums="1"
 db.purge()
 ```
 
-```python
+```py linenums="1"
 !cat test.json
 ```
 
