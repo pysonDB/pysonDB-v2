@@ -55,7 +55,7 @@ class PysonDB:
                 if UJSON:
                     ujson.dump(data, f, indent=self.indent)
                 else:
-                    json.dump(data, f, indent=self.indent)
+                    json.dump(data, f, indent=self.indent, ensure_ascii=False)
         else:
             self._au_memory = deepcopy(data)
         return None
