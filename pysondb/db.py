@@ -23,6 +23,7 @@ from pysondb.db_types import QueryType
 from pysondb.errors import IdDoesNotExistError
 from pysondb.errors import SchemaTypeError
 from pysondb.errors import UnknownKeyError
+from pysondb.errors import UnsafeCustomIdError
 
 
 class PysonDB:
@@ -33,6 +34,7 @@ class PysonDB:
         self._au_memory: DBSchemaType = {'version': 2, 'keys': [], 'data': {}}
         self.indent = indent
         self._id_generator = self._gen_id
+        self._custom_generator = False
         self.lock = Lock()
 
         self._gen_db_file()
@@ -53,7 +55,7 @@ class PysonDB:
                 if UJSON:
                     ujson.dump(data, f, indent=self.indent)
                 else:
-                    json.dump(data, f, indent=self.indent)
+                    json.dump(data, f, indent=self.indent, ensure_ascii=False)
         else:
             self._au_memory = deepcopy(data)
         return None
@@ -66,6 +68,17 @@ class PysonDB:
                     {'version': 2, 'keys': [], 'data': {}}
                 )
                 self.lock.release()
+
+    def _check_unsafe_custom_id(self, custom_id: int) -> str:
+        if self._custom_generator:
+            raise UnsafeCustomIdError(
+                'Custom id can not be used with custom generator'
+            )
+        if custom_id > 0:
+            raise UnsafeCustomIdError(
+                'Custom id must be a negative number to avoid conflicts with existing values'
+            )
+        return str(custom_id)
 
     def _gen_id(self) -> str:
         # generates a random 18 digit uuid
@@ -87,9 +100,18 @@ class PysonDB:
             self.auto_update = False
 
     def set_id_generator(self, fn: IdGeneratorType) -> None:
+        self._custom_generator = True
         self._id_generator = fn
 
-    def add(self, data: object) -> str:
+    def id_exists(self, _id: str) -> bool:
+        with self.lock:
+            data = self._load_file()
+            if not isinstance(data['data'], dict):
+                raise SchemaTypeError(
+                    '"data" key in the DB must be of type dict')
+            return _id in data['data']
+
+    def add(self, data: object, allow_unsafe_custom_id: bool = False) -> str:
         if not isinstance(data, dict):
             raise TypeError(f'data must be of type dict and not {type(data)}')
 
@@ -109,16 +131,21 @@ class PysonDB:
                         '(Either the key(s) does not exists in the DB or is missing in the given data)'
                     )
 
-            _id = str(self._id_generator())
             if not isinstance(db_data['data'], dict):
                 raise SchemaTypeError(
                     'data key in the db must be of type "dict"')
 
+            if allow_unsafe_custom_id and 'id' in data.keys():
+                _id = data.pop('id')
+                _id = self._check_unsafe_custom_id(_id)
+            else:
+                _id = str(self._id_generator())
             db_data['data'][_id] = data
             self._dump_file(db_data)
             return _id
 
-    def add_many(self, data: object, json_response: bool = False) -> Union[SingleDataType, None]:
+    def add_many(self, data: object, json_response: bool = False,
+                 allow_unsafe_custom_id: bool = False) -> Union[SingleDataType, None]:
 
         if not data:
             return None
@@ -156,7 +183,11 @@ class PysonDB:
                     'data key in the db must be of type "dict"')
 
             for d in data:
-                _id = str(self._id_generator())
+                if allow_unsafe_custom_id and 'id' in d.keys():
+                    _id = d.pop('id')
+                    _id = self._check_unsafe_custom_id(_id)
+                else:
+                    _id = str(self._id_generator())
                 db_data['data'][_id] = d
                 if json_response:
                     new_data[_id] = d
