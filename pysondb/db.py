@@ -103,6 +103,14 @@ class PysonDB:
         self._custom_generator = True
         self._id_generator = fn
 
+    def id_exists(self, _id: str) -> bool:
+        with self.lock:
+            data = self._load_file()
+            if not isinstance(data['data'], dict):
+                raise SchemaTypeError(
+                    '"data" key in the DB must be of type dict')
+            return _id in data['data']
+
     def add(self, data: object, allow_unsafe_custom_id: bool = False) -> str:
         if not isinstance(data, dict):
             raise TypeError(f'data must be of type dict and not {type(data)}')
